@@ -25,19 +25,13 @@ import SwiftyJSON
 
 class BaseTests: XCTestCase {
 
-    var testData: Data!
+    var jsonURL: URL!
 
     override func setUp() {
 
         super.setUp()
 
-//        let file = "./Tests/Tes/Tests.json"
-//        self.testData = try? Data(contentsOf: URL(fileURLWithPath: file))
-        if let file = Bundle(for: BaseTests.self).path(forResource: "Tests", ofType: "json") {
-            self.testData = try? Data(contentsOf: URL(fileURLWithPath: file))
-        } else {
-            XCTFail("Can't find the test JSON file")
-        }
+        jsonURL = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("../Tes/Tests.json")
     }
 
     override func tearDown() {
@@ -45,10 +39,16 @@ class BaseTests: XCTestCase {
     }
 
     func testInit() {
-        guard let json0 = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json0: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json0 = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+
         XCTAssertEqual(json0.array!.count, 3)
         XCTAssertEqual(JSON("123").description, "123")
         XCTAssertEqual(JSON(["1": "2"])["1"].string!, "2")
@@ -57,10 +57,11 @@ class BaseTests: XCTestCase {
         dictionary.setObject(NSNull(), forKey: "null" as NSString)
         _ = JSON(dictionary)
         do {
-            let object: Any = try JSONSerialization.jsonObject(with: self.testData, options: [])
+            let object: Any = try JSONSerialization.jsonObject(with: testData, options: [])
             let json2 = JSON(object)
             XCTAssertEqual(json0, json2)
-        } catch _ {
+        } catch {
+            XCTFail(error.localizedDescription)
         }
     }
 
@@ -81,9 +82,13 @@ class BaseTests: XCTestCase {
     }
 
     func testJSONDoesProduceValidWithCorrectKeyPath() {
-
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
 
@@ -234,10 +239,16 @@ class BaseTests: XCTestCase {
     }
 
     func testErrorHandle() {
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         if json["wrong-type"].string != nil {
             XCTFail("Should not run into here")
         } else {
@@ -257,10 +268,16 @@ class BaseTests: XCTestCase {
     }
 
     func testReturnObject() {
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         XCTAssertNotNil(json.object)
     }
 

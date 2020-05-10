@@ -25,16 +25,12 @@ import SwiftyJSON
 
 class PerformanceTests: XCTestCase {
 
-    var testData: Data!
+    var jsonURL: URL!
 
     override func setUp() {
         super.setUp()
 
-        if let file = Bundle(for: PerformanceTests.self).path(forResource: "Tests", ofType: "json") {
-            self.testData = try? Data(contentsOf: URL(fileURLWithPath: file))
-        } else {
-            XCTFail("Can't find the test JSON file")
-        }
+        jsonURL = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("../Tes/Tests.json")
     }
 
     override func tearDown() {
@@ -43,9 +39,17 @@ class PerformanceTests: XCTestCase {
     }
 
     func testInitPerformance() {
+        let testData: Data
+        do {
+            testData = try Data(contentsOf: jsonURL)
+        } catch {
+            XCTFail(error.localizedDescription)
+            return
+        }
+        
         self.measure {
             for _ in 1...100 {
-                guard let json = try? JSON(data: self.testData) else {
+                guard let json = try? JSON(data: testData) else {
                     XCTFail("Unable to parse testData")
                     return
                 }
@@ -55,10 +59,16 @@ class PerformanceTests: XCTestCase {
     }
 
     func testObjectMethodPerformance() {
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         self.measure {
             for _ in 1...100 {
                 let object: Any? = json.object
@@ -68,10 +78,16 @@ class PerformanceTests: XCTestCase {
     }
 
     func testArrayMethodPerformance() {
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         self.measure {
             for _ in 1...100 {
                 autoreleasepool {
@@ -84,10 +100,16 @@ class PerformanceTests: XCTestCase {
     }
 
     func testDictionaryMethodPerformance() {
-        guard let json = try? JSON(data: self.testData)[0] else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         self.measure {
             for _ in 1...100 {
                 autoreleasepool {
@@ -100,10 +122,16 @@ class PerformanceTests: XCTestCase {
     }
 
     func testRawStringMethodPerformance() {
-        guard let json = try? JSON(data: self.testData) else {
-            XCTFail("Unable to parse testData")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
             return
         }
+        
         self.measure {
             for _ in 1...100 {
                 autoreleasepool {

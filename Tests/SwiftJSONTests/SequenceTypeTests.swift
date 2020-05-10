@@ -26,26 +26,28 @@ import SwiftyJSON
 class SequenceTypeTests: XCTestCase {
 
     func testJSONFile() {
-        if let file = Bundle(for: BaseTests.self).path(forResource: "Tests", ofType: "json") {
-            let testData = try? Data(contentsOf: URL(fileURLWithPath: file))
-            guard let json = try? JSON(data: testData!) else {
-                XCTFail("Unable to parse the data")
-                return
+        let jsonURL = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("../Tes/Tests.json")
+        let testData: Data
+        let json: JSON
+        do {
+            testData = try Data(contentsOf: jsonURL)
+            json = try JSON(data: testData)
+        } catch {
+            XCTFail(error.localizedDescription)
+            return
+        }
+
+        for (index, sub) in json {
+            switch (index as NSString).integerValue {
+            case 0:
+                XCTAssertTrue(sub["id_str"] == "240558470661799936")
+            case 1:
+                XCTAssertTrue(sub["id_str"] == "240556426106372096")
+            case 2:
+                XCTAssertTrue(sub["id_str"] == "240539141056638977")
+            default:
+                continue
             }
-            for (index, sub) in json {
-                switch (index as NSString).integerValue {
-                case 0:
-                    XCTAssertTrue(sub["id_str"] == "240558470661799936")
-                case 1:
-                    XCTAssertTrue(sub["id_str"] == "240556426106372096")
-                case 2:
-                    XCTAssertTrue(sub["id_str"] == "240539141056638977")
-                default:
-                    continue
-                }
-            }
-        } else {
-            XCTFail("Can't find the test JSON file")
         }
     }
 
